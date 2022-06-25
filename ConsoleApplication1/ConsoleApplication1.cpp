@@ -5,24 +5,30 @@
 #include <vector>
 #include <map>
 #include <list>
+#include <type_traits>
+#include <xutility>
+#include <iterator>
 
 // should be used for vectors
-template <typename T>
-int my_distance(typename std::vector<T>::iterator a, typename std::vector<T>::iterator b) {
+template <typename T, std::enable_if_t<std::is_same<typename T::iterator_category, std::random_access_iterator_tag>::value, bool> = true>
+    int my_distance(T a, T b) {
+    std::cout << "std::is_same\n";
     return b - a;
 }
 
 // should be used for raw pointers
 template <typename T>
 int my_distance(T* a, T* b) {
+    std::cout << "pointer\n";
     return b - a;
 }
 
 // should be used for lists
-template <typename T>
-int my_distance(typename std::list<T>::iterator a, typename std::list<T>::iterator b) {
+template <typename T, std::enable_if_t<!std::is_same<typename T::iterator_category, std::random_access_iterator_tag>::value, bool> = true>
+int my_distance(T a, T b) {
+    std::cout << "!std::is_same\n";
     int ctr = 0;
-    for (typename std::list<T>::iterator i = a; i != b; i = i.next(), ctr++);
+    for (T i = a; i != b; i++, ctr++);
     return ctr;
 }
 
